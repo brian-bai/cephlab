@@ -14,3 +14,8 @@ Cargo.lock
 *.pdb
 *.vdi
 .vagrant/
+
+repos/
+ansible/official_ansible
+ansible/fetched
+*.pub

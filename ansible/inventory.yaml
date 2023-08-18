@@ -1,0 +1,13 @@
+cephs:
+  hosts:
+    cephnode1:
+    cephnode2:
+    cephnode3:
+apps:
+  hosts:
+    cephapp1:
+    cephapp2:
+admins:
+  hosts:
+    cephnode1:
+    

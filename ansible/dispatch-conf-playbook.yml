@@ -1,0 +1,54 @@
+# ansible-playbook -i <inventory host file> replace-repo-playbook.yml -K -u vagrant
+#
+
+- hosts: cephnode1
+  become: true
+  tasks:
+
+  - name: fetch ceph.conf
+    fetch:
+      src: /etc/ceph/ceph.conf
+      dest: fetched/
+      flat: yes
+  
+  - name: fetch cephfs keyring
+    fetch:
+      src: /etc/ceph/ceph.client.foo.keyring
+      dest: fetched/
+      flat: yes
+
+  - name: fetch cephfs admin keyring
+    fetch:
+      src: /etc/ceph/ceph.client.admin.keyring
+      dest: fetched/
+      flat: yes
+
+- hosts: apps
+  become: true
+  tasks:
+
+  - name: dispatch ceph.conf
+    copy:
+      src: "fetched/ceph.conf"
+      dest: "/etc/ceph"
+      owner: root
+      group: root
+      mode: '0644'
+    
+  - name: dispatch cephfs keyring
+    copy:
+      src: "fetched/ceph.client.foo.keyring"
+      dest: "/etc/ceph"
+      owner: root
+      group: root
+      mode: '0600'
+
+  - name: dispatch cephfs admin keyring
+    copy:
+      src: "fetched/ceph.client.admin.keyring"
+      dest: "/etc/ceph"
+      owner: root
+      group: root
+      mode: '0600'
+
+

@@ -12,7 +12,7 @@ Vagrant.configure("2") do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
-  config.vm.box = "ubuntu/focal64"
+  config.vm.box = "bento/centos-8"
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -86,8 +86,8 @@ Vagrant.configure("2") do |config|
  
 
  
-  config.vm.define "storage01" do |s1|
-    s1.vm.hostname = "cephadmn1"
+  config.vm.define "cephnode1" do |s1|
+    s1.vm.hostname = "cephnode1"
 	  storage = "storage01.vdi"
 
 	  s1.persistent_storage.enabled = true
@@ -99,13 +99,12 @@ Vagrant.configure("2") do |config|
 	
 	  s1.persistent_storage.use_lvm = false
 
-    s1.vm.box = "ubuntu/focal64"
 	  s1.vm.network "private_network", ip: "192.168.56.4"
     s1.vm.network :forwarded_port, guest: 8443, host:8443
-    s1.vm.provision "shell", path: "cephadm_install.sh"
+    # s1.vm.provision "shell", path: "cephadm_install.sh"
   end
-  config.vm.define "storage02" do |s2|
-    s2.vm.hostname = "cephadmn2"
+  config.vm.define "cephnode2" do |s2|
+    s2.vm.hostname = "cephnode2"
   	s2.persistent_storage.enabled = true
 	  s2.persistent_storage.location = "./storage02.vdi"
 	  s2.persistent_storage.size = 10000
@@ -113,13 +112,12 @@ Vagrant.configure("2") do |config|
 	  s2.persistent_storage.volgroupname = 'storage02'
 	  s2.persistent_storage.diskdevice = '/dev/sdc'
 	  s2.persistent_storage.use_lvm = false
-    s2.vm.box = "ubuntu/focal64"
 	  s2.vm.network "private_network", ip: "192.168.56.5"
-    s2.vm.provision "shell", inline: "apt install -y chrony"
-    s2.vm.provision "shell", path: "docker_install.sh"
+    # s2.vm.provision "shell", inline: "apt install -y chrony"
+    # s2.vm.provision "shell", path: "docker_install.sh"
   end
-  config.vm.define "storage03" do |s3|
-    s3.vm.hostname = "cephadmn3"
+  config.vm.define "cephnode3" do |s3|
+    s3.vm.hostname = "cephnode3"
   	s3.persistent_storage.enabled = true
 	  s3.persistent_storage.location = "./storage03.vdi"
 	  s3.persistent_storage.size = 10000
@@ -127,10 +125,24 @@ Vagrant.configure("2") do |config|
 	  s3.persistent_storage.volgroupname = 'storage01'
 	  s3.persistent_storage.diskdevice = '/dev/sdc'
 	  s3.persistent_storage.use_lvm = false
-    s3.vm.box = "ubuntu/focal64"
 	  s3.vm.network "private_network", ip: "192.168.56.6"
-    s3.vm.provision "shell", inline: "apt install -y chrony"
-    s3.vm.provision "shell", path: "docker_install.sh"
+    # s3.vm.provision "shell", inline: "apt install -y chrony"
+    # s3.vm.provision "shell", path: "docker_install.sh"
   end
-
+  config.vm.define "cephapp1" do |s4|
+    s4.vm.hostname = "cephapp1"
+    s4.vm.provider "virtualbox" do |vb|
+      vb.memory = "1024"
+    end
+	  s4.vm.network "private_network", ip: "192.168.56.7"
+    # s4.vm.provision "shell", inline: "apt install -y chrony"
+  end
+  config.vm.define "cephapp2" do |s5|
+    s5.vm.hostname = "cephapp2"
+    s5.vm.provider "virtualbox" do |vb|
+      vb.memory = "1024"
+    end
+	  s5.vm.network "private_network", ip: "192.168.56.8"
+    # s4.vm.provision "shell", inline: "apt install -y chrony"
+  end
 end

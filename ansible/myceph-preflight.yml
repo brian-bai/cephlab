@@ -1,0 +1,67 @@
+---
+# Copyright Red Hat
+# SPDX-License-Identifier: Apache-2.0
+#
+# This playbook configures the Ceph repository.
+# It also installs some prerequisites (podman, lvm2, chronyd, cephadm, ...)
+#
+# Usage:
+#
+# ansible-playbook -i <inventory host file> cephadm-preflight.yml
+#
+# You can limit the execution to a set of hosts by using `--limit` option:
+#
+# ansible-playbook -i <inventory host file> cephadm-preflight.yml --limit <my_osd_group|my_node_name>
+#
+# You can override variables using `--extra-vars` parameter:
+#
+# ansible-playbook -i inventory.yaml myceph-preflight.yml -K -u vagrant
+#
+
+- hosts: cephs
+  become: true
+  tasks:
+    - name: redhat family of OS related tasks
+      when: ansible_facts['distribution'] == 'CentOS' or ansible_facts['distribution'] == 'RedHat'
+      block:
+        - name: install prerequisites packages
+          yum:
+            name: "{{ ['python3','podman','lvm2'] }}"
+            state: present
+            update_cache: yes
+          register: result
+          until: result is succeeded
+- hosts: all
+  become: true
+  tasks:
+    - name: ensure chronyd is running
+      service:
+        name: chronyd
+        state: started
+        enabled: yes
+    # - name: enable RTC
+    #   shell: timedatectl set-local-rtc 0
+
+- hosts: apps
+  become: true
+  tasks:
+    - name: add ceph repo
+      copy:
+        src: "ceph.repo"
+        dest: "/etc/yum.repos.d"
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: install rados pacakges
+      yum:
+        name: "{{ ['librados2-devel','python-rados', 's3cmd','ceph-common'] }}"
+    
+    - name: install boto3
+      shell: pip3 install boto3 --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple
+    
+    # - name: install pytorch
+    #   shell: pip3 install torch torchvision --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+    # - name: install s3cmd
+    #   shell: pip3 install s3cmd  --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple

@@ -1,0 +1,32 @@
+# ansible-playbook -i <inventory host file> replace-repo-playbook.yml -K -u vagrant
+#
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: repo files glob
+    find:
+      paths: /etc/yum.repos.d
+      patterns: '*.repo'
+    register: repos_to_delete
+
+  - name: remove old repos
+    file:
+      path: "{{ item.path }}"
+      state: absent
+    with_items: "{{ repos_to_delete.files }}"
+
+  - name: replace yum repos
+    copy:
+      src: "CentOS-Linux-BaseOS.repo"
+      dest: "/etc/yum.repos.d"
+      owner: root
+      group: root
+      mode: '0644'
+
+  - name: repos clean and makecache 
+    shell: yum clean all && yum makecache
+  
+  - name: add RPM-GPG-KEY-EPEL-8
+    shell: yum install -y epel-release

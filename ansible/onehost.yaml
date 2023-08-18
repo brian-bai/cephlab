@@ -1,0 +1,5 @@
+apps:
+  hosts:
+    cephapp2:
+    cephnode2:
+    cephnode3:
